@@ -16,13 +16,16 @@ router.get('/', (req: Request, res: Response) => {
     res.send('Up and running!');
 });
 
-
-interface FileUpload {
-  src_image: Express.Multer.File;
-  target_img: Express.Multer.File;
-}
-
-router.post('/swap', upload.array('file'), async (req, res) => {
+router.post('/swap', upload.fields([
+  {
+    name: 'src_image',
+    maxCount: 1
+  },
+  {
+    name: 'target_img',
+    maxCount: 1
+  }
+]), async (req, res) => {
   try {
     const files = req.files ?? [] as Express.Multer.File[];
     console.log(files);

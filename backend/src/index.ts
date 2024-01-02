@@ -15,7 +15,12 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
 app.use(ApiRoutes.faceswap, FaceSwapRouter);
 app.use(
-  cors()
+  cors(
+    {
+      origin: "*",
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    }
+  )
 )
 app.use(express.json());
 app.use(morgan("tiny"));
