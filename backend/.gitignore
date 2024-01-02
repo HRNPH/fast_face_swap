@@ -1,0 +1,9 @@
+.idea
+.DS_Store
+node_modules
+typings
+build
+/**/*.js
+/tmp/**/*
+.env.local
+.env

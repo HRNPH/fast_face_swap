@@ -1,0 +1,18 @@
+version: '3'
+services:
+  db:
+    platform: linux/x86_64 # optional, this was used to
+    image: mysql:5.7
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: 'db'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - fast-face-swap:/var/lib/mysql
+volumes:
+  fast-face-swap:
