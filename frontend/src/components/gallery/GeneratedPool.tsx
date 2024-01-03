@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@radix-ui/themes";
+import { Button, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
@@ -230,9 +230,17 @@ export default function GeneratedPool(props: { className?: string }) {
         <span className="text-primary"> {shownGalleryImages.length} </span>
         Generated Images
       </div>
+      {/* if 0 */}
+      {shownGalleryImages.length == 0 && (
+        <Text className="text-xl font-bold text-foreground text-center">
+          No Images Found, try another filter or upload new images
+        </Text>
+      )}
       <ResponsiveMasonry
         columnsCountBreakPoints={{ 350: 1, 750: 2, 900: 3, 1200: 4, 1500: 5 }}
-        className={`w-1/2 ${props.className}`}
+        className={`w-1/2 ${props.className} ${
+          shownGalleryImages.length == 0 ? "hidden" : ""
+        }`}
       >
         <Masonry className="overflow-y-scroll h-96 w-screen border-b-2">
           {shownGalleryImages.map((image, index) => (
