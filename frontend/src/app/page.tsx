@@ -1,5 +1,5 @@
 import Image from "next/image";
-import UploadImages from "../../components/UploadImg";
+import UploadImages from "../components/UploadImg";
 
 export default function Home() {
   return (

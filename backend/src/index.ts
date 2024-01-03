@@ -8,25 +8,17 @@ import cors from 'cors';
 
 const app: express.Application = express();
 const port: number = Number(process.env.PORT) || 3000;
+app.use(cors())
+app.use(ApiRoutes.faceswap, FaceSwapRouter);
+app.use(express.json());
+app.use(morgan("tiny"));
+app.use(express.static("public"));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 
 app.get('/', (req: express.Request, res: express.Response) => {
     res.send('Up and running!');
 });
 
-app.use(ApiRoutes.faceswap, FaceSwapRouter);
-app.use(
-  cors(
-    {
-      origin: "*",
-      allowedHeaders: "Content-Type,Authorization",
-      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    }
-  )
-)
-app.use(express.json());
-app.use(morgan("tiny"));
-app.use(express.static("public"));
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 app.listen(port, () => {
     console.log(`Listening at http://localhost:${port}/`);
 });
