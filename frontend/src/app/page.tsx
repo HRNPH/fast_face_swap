@@ -1,6 +1,6 @@
 import Image from "next/image";
 import UploadImages from "../components/UploadImg";
-import GeneratedPool from "@/components/GeneratedPool";
+import GeneratedPool from "@/components/gallery/GeneratedPool";
 
 export default function Home() {
   return (

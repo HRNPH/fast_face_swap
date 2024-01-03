@@ -6,75 +6,16 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { TextField } from "@radix-ui/themes";
 import { read } from "fs";
-
-interface BaseResponse {
-  message: string;
-}
-
-type Swaps = {
-  id: number;
-  name: string | null;
-  source_img: string;
-  target_img: string;
-  output_img_url: string;
-  createdAt: string;
-  updatedAt: string;
-  cached_days: number;
-  det_thresh: number;
-  weight: number;
-};
-
-interface SwapHistoryResponse extends BaseResponse {
-  swaps: Swaps[];
-}
+import {
+  DeleteSwap,
+  GetSwaps,
+  SwapHistoryResponse,
+  Swaps,
+  UpdateSwap,
+} from "@/utils/api";
 
 enum StatusMSG {
   "NULL" = "N/A",
-}
-
-async function DeleteSwap(id: number) {
-  try {
-    if (!id) {
-      throw new Error("Invalid ID provided, from client");
-    }
-    const data = new FormData();
-    data.append("id", id.toString());
-    const request = await fetch(`${process.env.API_URL}/api/faceswap/swap`, {
-      method: "DELETE",
-      body: data,
-    });
-
-    if (!request.ok) {
-      throw new Error("Network response was not ok");
-    }
-    return request;
-  } catch (error) {
-    console.error("Error deleting swap:", error);
-    throw new Error("Error deleting swap");
-  }
-}
-
-async function UpdateSwap(id: number, name: string) {
-  try {
-    if (!id) {
-      throw new Error("Invalid ID provided, from client");
-    }
-    const data = new FormData();
-    data.append("id", id.toString());
-    data.append("name", name);
-    const request = await fetch(`${process.env.API_URL}/api/faceswap/swap`, {
-      method: "PUT",
-      body: data,
-    });
-
-    if (!request.ok) {
-      throw new Error("Network response was not ok");
-    }
-    return request;
-  } catch (error) {
-    console.error("Error updating swap:", error);
-    throw new Error("Error updating swap");
-  }
 }
 
 interface ImageWrapperProps {
@@ -242,11 +183,9 @@ export default function GeneratedPool(props: { className?: string }) {
   // get images from api
   async function getImages() {
     try {
-      const result = await fetch(`${process.env.API_URL}/api/faceswap/swap`, {
-        method: "GET",
+      const result = await GetSwaps().then((res) => {
+        setGalleryImages(res.swaps);
       });
-      const images = (await result.json()) as SwapHistoryResponse;
-      setGalleryImages(images.swaps);
     } catch (error) {
       console.error("Error fetching images:", error);
     }

@@ -2,17 +2,18 @@
 import { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
 import * as Slider from "@radix-ui/react-slider";
-import { normalize } from "path";
-import { TextField } from "@radix-ui/themes";
-type swapParams = {
-  name: string;
-  det_thresh: number;
-  cache_days: number;
-  weight: number;
-};
+import { Slot, TextField } from "@radix-ui/themes";
+import { CreateSwap, SwapCreateFormData, swapParams } from "@/utils/api";
 
 function onUploadSuccess() {
   window.location.reload();
+}
+
+function IsAllowedFile(file: File) {
+  // allow all image types
+  console.log(file.type);
+  const allowed_types = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+  return allowed_types.includes(file.type);
 }
 
 export default function UploadImages() {
@@ -20,7 +21,7 @@ export default function UploadImages() {
   const [target_img, setTargetImg] = useState<Blob | null>(null);
   const [result_img, setResultImg] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
-
+  const [formValid, setFormValid] = useState<boolean>(false);
   // cached result_img
   useEffect(() => {
     if (!result_img) return;
@@ -34,6 +35,20 @@ export default function UploadImages() {
       setResultImg(result_img);
     }
   }, []);
+
+  useEffect(() => {
+    if (!src_image || !target_img) {
+      console.log("not valid");
+
+      setFormValid(false);
+      return;
+    }
+    if (IsAllowedFile(src_image as File) && IsAllowedFile(target_img as File)) {
+      console.log("valid");
+      setFormValid(true);
+      return;
+    }
+  }, [src_image, target_img]);
 
   const [params, setParams] = useState<swapParams>({
     det_thresh: 0.6,
@@ -87,20 +102,12 @@ export default function UploadImages() {
       formData.append("weight", params.weight.toString());
       formData.append("name", params.name);
 
-      const response = await fetch(`${process.env.API_URL}/api/faceswap/swap`, {
-        method: "POST",
-        body: formData,
+      await CreateSwap(formData as SwapCreateFormData).then((res) => {
+        setResultImg(res.output.image);
+        // Handle success or redirect as needed
+        setIsUploading(false);
+        onUploadSuccess();
       });
-
-      console.log(response);
-      response.json().then((data) => {
-        setResultImg(data.output.image);
-      });
-
-      // Handle success or redirect as needed
-      console.log("Upload successful!");
-      setIsUploading(false);
-      onUploadSuccess();
     } catch (error) {
       setIsUploading(false);
       console.error("Error uploading files:", error);
@@ -121,54 +128,45 @@ export default function UploadImages() {
                 <Form.Label className="text-xl font-bold mb-4">
                   Source Image
                 </Form.Label>
-                <Form.Control asChild type="file">
-                  <div className="flex items-center justify-center w-full">
-                    <label
-                      htmlFor="drop-source-img"
-                      className="flex flex-col items-center justify-center w-full h-32 md:h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                    >
-                      <div className="flex flex-col items-center justify-center pt-5 pb-4">
-                        <svg
-                          className="w-6 h-6 md:w-8 md:h-8 mb-2 md:mb-4 text-gray-500 dark:text-gray-400"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 20 16"
-                        >
-                          <path
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                          />
-                        </svg>
-                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">Click to upload</span>{" "}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          SVG, PNG, JPG, JPEG
-                        </p>
-                      </div>
-                      <input
-                        id="drop-source-img"
-                        name="src_image"
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => {
-                          setSrcImage(e?.target?.files?.[0] ?? null);
-                        }}
-                      />
-                    </label>
-                  </div>
-                </Form.Control>
-                <Form.Message
-                  match={(value, formData) => {
-                    return true;
-                  }}
-                >
-                  Please upload a valid image
-                </Form.Message>
+                <div className="flex items-center justify-center w-full">
+                  <label
+                    htmlFor="drop-source-img"
+                    className="flex flex-col items-center justify-center w-full h-32 md:h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-4">
+                      <svg
+                        className="w-6 h-6 md:w-8 md:h-8 mb-2 md:mb-4 text-gray-500 dark:text-gray-400"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 20 16"
+                      >
+                        <path
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                        />
+                      </svg>
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">Click to upload</span>
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        PNG, JPG, JPEG, WEBP
+                      </p>
+                    </div>
+                    <input
+                      id="drop-source-img"
+                      name="src_image"
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => {
+                        setSrcImage(e?.target?.files?.[0] ?? null);
+                      }}
+                    />
+                  </label>
+                </div>
               </Form.Field>
             </div>
             {/* target img */}
@@ -177,47 +175,45 @@ export default function UploadImages() {
                 <Form.Label className="text-xl font-bold mb-4">
                   Target Image
                 </Form.Label>
-                <Form.Control asChild type="file">
-                  <div className="flex items-center justify-center w-full">
-                    <label
-                      htmlFor="drop-target-img"
-                      className="flex flex-col items-center justify-center w-full h-32 md:h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                    >
-                      <div className="flex flex-col items-center justify-center pt-5 pb-4">
-                        <svg
-                          className="w-6 h-6 md:w-8 md:h-8 mb-2 md:mb-4 text-gray-500 dark:text-gray-400"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 20 16"
-                        >
-                          <path
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                          />
-                        </svg>
-                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">Click to upload</span>{" "}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          SVG, PNG, JPG, JPEG
-                        </p>
-                      </div>
-                      <input
-                        id="drop-target-img"
-                        name="target_img"
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => {
-                          setTargetImg(e?.target?.files?.[0] ?? null);
-                        }}
-                      />
-                    </label>
-                  </div>
-                </Form.Control>
+                <div className="flex items-center justify-center w-full">
+                  <label
+                    htmlFor="drop-target-img"
+                    className="flex flex-col items-center justify-center w-full h-32 md:h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-4">
+                      <svg
+                        className="w-6 h-6 md:w-8 md:h-8 mb-2 md:mb-4 text-gray-500 dark:text-gray-400"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 20 16"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                        />
+                      </svg>
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">Click to upload</span>{" "}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        PNG, JPG, JPEG, WEBP
+                      </p>
+                    </div>
+                    <input
+                      id="drop-target-img"
+                      name="target_img"
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => {
+                        setTargetImg(e?.target?.files?.[0] ?? null);
+                      }}
+                    />
+                  </label>
+                </div>
               </Form.Field>
             </div>
           </div>
@@ -315,10 +311,14 @@ export default function UploadImages() {
             </div>
           </div>
           <Form.Submit
-            disabled={isUploading}
-            className="bg-primary text-cutoff py-2 px-4 rounded hover:bg-primary-light focus:outline-none focus:bg-secondary w-full mt-5"
+            disabled={isUploading || !formValid}
+            className="bg-primary text-cutoff py-2 px-4 rounded hover:bg-primary-light focus:outline-none focus:bg-secondary w-full mt-5 disabled:bg-foreground-light disabled:cursor-not-allowed"
           >
-            {isUploading ? "Uploading..." : "Upload"}
+            {!formValid
+              ? "Invalid Form"
+              : isUploading
+              ? "Uploading..."
+              : "Upload"}
           </Form.Submit>
         </Form.Root>
 
