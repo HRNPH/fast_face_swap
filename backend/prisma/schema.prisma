@@ -16,6 +16,7 @@ model SwapPair {
   target_img     String
   output_img_url String
   request_id     String
+  cached_days    Int      @default(10)
   det_thresh     Float    @default(0.1)
   weight         Float    @default(0.5)
   createdAt      DateTime @default(now())

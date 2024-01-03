@@ -131,7 +131,10 @@ router.post('/swap', upload.fields([
           request_id: req_id,
           source_img: fnames.src_image,
           target_img: fnames.target_img,
+          cached_days: config.cache_days ?? 10,
           output_img_url: output.image ?? '',
+          det_thresh: config.det_thresh ?? 0.5,
+          weight: config.weight ?? 0.5,
         }
       });
       res.json({ message: 'Face swap successful!', output: output });
