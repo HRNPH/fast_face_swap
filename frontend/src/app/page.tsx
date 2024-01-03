@@ -15,9 +15,8 @@ export default function Home() {
           <span className="text-primary"> AI </span>
           Generated
           <span className="text-primary"> Faces Swap </span>
-          Images
-          <span className="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">
-            Easy{" "}
+          Images Made Easy <br />
+          <span className="text-foreground">
             <span className="text-primary transition hover:cursor-pointer hover:text-primary hover:underline">
               <a href="#generation_section">Generation</a>
             </span>
