@@ -51,13 +51,14 @@ interface ReplicateResponse extends Object {
 
 interface GetSwapResponse {
   message: string;
+
   request_id: string;
   source_img: string;
   target_img: string;
   output_img_url: string;
 }
 
-router.get('/swap', async function (req, res) {
+router.get('/swap', async (req, res) => {
   try {
     const swaps = await prisma.swapPair.findMany();
     res.json(swaps);
