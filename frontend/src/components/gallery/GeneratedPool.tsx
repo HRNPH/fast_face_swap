@@ -84,7 +84,7 @@ function ImageWrapper(props: ImageWrapperProps) {
     <Dialog.Root>
       <Dialog.Trigger asChild style={{ pointerEvents: "auto" }}>
         {/* id number on hover */}
-        <div className="relative w-full h-full rounded-lg overflow-hidden shadow-sm hover:opacity-85 transition ease-in-out hover:duration-300 hover:transform hover:scale-105">
+        <div className="relative w-full h-full rounded-lg overflow-hidden shadow-sm hover:opacity-85 transition ease-in-out hover:duration-300 hover:transform hover:scale-105 hover:cursor-pointer">
           <img
             src={swap.output_img_url}
             className="h-auto w-full max-w-full rounded-lg object-cover object-center hover:cursor-pointer hover:opacity-85 transition ease-in-out hover:duration-300 hover:transform hover:scale-105"
