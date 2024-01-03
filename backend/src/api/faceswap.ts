@@ -49,18 +49,6 @@ interface ReplicateResponse extends Object {
   status: string;
 }
 
-router.get('/swap', async (req, res) => {
-  try {
-    const swaps = await prisma.swapPair.findMany();
-    res.json(swaps);
-  }
-  catch (err) {
-    console.log(err);
-    res.status(500).json({ message: err });
-  }
-}
-);
-
 type SwapBodyParamsGet ={
   det_thresh: string;
   cache_days: string;
@@ -72,6 +60,22 @@ type SwapBodyParams ={
   cache_days: number;
   weight: number;
 }
+
+router.get('/swap', async (req, res) => {
+  try {
+    const swaps = await prisma.swapPair.findMany(); // get all swaps
+    console.log("Consist of ", swaps.length, " swaps");
+    res.json({
+      message: 'All swaps history',
+      swaps: swaps,
+    });
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json({ message: err });
+  }
+}
+);
 
 router.post('/swap', upload.fields([
   {

@@ -88,7 +88,7 @@ export default function UploadImages() {
 
   return (
     <div className="w-full mx-auto my-8">
-      <div className="bg-white border border-gray-300 rounded-md shadow-md p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="w-full bg-white border border-gray-300 rounded-md shadow-md p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <Form.Root onSubmit={handleUpload}>
           <div
             id="upload section"
@@ -260,11 +260,11 @@ export default function UploadImages() {
                       }
                     }}
                   >
-                    <Slider.Track className="bg-black relative grow rounded-full h-[3px]">
-                      <Slider.Range className="absolute bg-violet-400 rounded-full h-full" />
+                    <Slider.Track className="bg-foreground relative grow rounded-full h-[3px]">
+                      <Slider.Range className="absolute bg-primary rounded-full h-full" />
                     </Slider.Track>
                     <Slider.Thumb
-                      className="block w-5 h-5 bg-white shadow-[0_2px_10px] shadow-blackA4 rounded-[10px] hover:bg-violet-500 focus:outline-none focus:shadow-[0_0_0_5px"
+                      className="block w-5 h-5 bg-cutoff shadow-[0_2px_10px] shadow-blackA4 rounded-[10px] hover:bg-violet-500 focus:outline-none focus:shadow-[0_0_0_5px"
                       aria-label="Slider thumb"
                     />
                   </Slider.Root>
@@ -274,7 +274,7 @@ export default function UploadImages() {
           </div>
           <Form.Submit
             disabled={isUploading}
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600 w-full mt-5"
+            className="bg-primary text-cutoff py-2 px-4 rounded hover:bg-primary-light focus:outline-none focus:bg-secondary w-full mt-5"
           >
             {isUploading ? "Uploading..." : "Upload"}
           </Form.Submit>
