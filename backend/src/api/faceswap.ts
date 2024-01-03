@@ -49,15 +49,6 @@ interface ReplicateResponse extends Object {
   status: string;
 }
 
-interface GetSwapResponse {
-  message: string;
-
-  request_id: string;
-  source_img: string;
-  target_img: string;
-  output_img_url: string;
-}
-
 router.get('/swap', async (req, res) => {
   try {
     const swaps = await prisma.swapPair.findMany();
@@ -69,6 +60,18 @@ router.get('/swap', async (req, res) => {
   }
 }
 );
+
+type SwapBodyParamsGet ={
+  det_thresh: string;
+  cache_days: string;
+  weight: string;
+}
+
+type SwapBodyParams ={
+  det_thresh: number;
+  cache_days: number;
+  weight: number;
+}
 
 router.post('/swap', upload.fields([
   {
@@ -84,6 +87,12 @@ router.post('/swap', upload.fields([
     const files: FaceSwapRequest = req.files as unknown as FaceSwapRequest;
     const src_image = await files['src_image'][0].buffer.toString('base64');
     const target_img = await files['target_img'][0].buffer.toString('base64');
+    let { det_thresh, cache_days, weight } = req.body as Partial<SwapBodyParamsGet>
+    const config: SwapBodyParams = {
+      det_thresh: Number(det_thresh),
+      cache_days: Number(cache_days),
+      weight: Number(weight),
+    }
     // read buffer from file to base64
     const req_id = randomUUID();
     const base64of = {
@@ -94,6 +103,9 @@ router.post('/swap', upload.fields([
       request_id: req_id,
       local_source: base64of.src_image, // base64
       local_target: base64of.target_img, // base64
+      det_thresh: config.det_thresh ?? 0.5,
+      cache_days: config.cache_days ?? 7,
+      weight: config.weight ?? 0.5,
     }
 
     const output: Partial<ReplicateResponse> = await replicateClient.run(

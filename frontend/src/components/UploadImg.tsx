@@ -1,11 +1,52 @@
 "use client";
 import { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
+import * as Slider from "@radix-ui/react-slider";
+import { normalize } from "path";
+type swapParams = {
+  det_thresh: number;
+  cache_days: number;
+  weight: number;
+};
 
 export default function UploadImages() {
   const [src_image, setSrcImage] = useState<File | null>(null);
   const [target_img, setTargetImg] = useState<File | null>(null);
   const [result_img, setResultImg] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  const [params, setParams] = useState<swapParams>({
+    det_thresh: 0.6,
+    cache_days: 10,
+    weight: 0.8,
+  });
+
+  const paramsList = [
+    {
+      name: "cache_days",
+      display_name: "Cache Days",
+      value: params.cache_days,
+      max: 10,
+      normalize: false,
+      min: 1,
+    },
+    {
+      name: "det_thresh",
+      display_name: "Detection Threshold",
+      value: params.det_thresh,
+      max: 100,
+      normalize: true,
+      min: 0,
+    },
+    {
+      name: "weight",
+      display_name: "Weight",
+      value: params.weight,
+      max: 100,
+      normalize: true,
+      min: 0,
+    },
+  ];
 
   function create_url_source(x: File | null) {
     if (!x) return;
@@ -16,9 +57,13 @@ export default function UploadImages() {
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      setIsUploading(true);
       const formData = new FormData();
       formData.append("src_image", src_image as Blob);
+      formData.append("cache_days", params.cache_days.toString());
       formData.append("target_img", target_img as Blob);
+      formData.append("det_thresh", params.det_thresh.toString());
+      formData.append("weight", params.weight.toString());
 
       const response = await fetch(`${process.env.API_URL}/api/faceswap/swap`, {
         method: "POST",
@@ -33,8 +78,10 @@ export default function UploadImages() {
 
       // Handle success or redirect as needed
       console.log("Upload successful!");
+      setIsUploading(false);
       //   onUploadSuccess();
     } catch (error) {
+      setIsUploading(false);
       console.error("Error uploading files:", error);
     }
   };
@@ -179,8 +226,57 @@ export default function UploadImages() {
             </div>
           </div>
 
-          <Form.Submit className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600 w-full mt-5">
-            Upload
+          {/* parameters */}
+          <div className="w-full mt-4">
+            {/* det_thresh */}
+            <div className="flex flex-col items-center justify-center w-full">
+              {/* map */}
+              {paramsList.map((param) => (
+                <div key={param.name} className="w-full mt-4">
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor={param.name}
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-400"
+                    >
+                      {param.display_name}
+                    </label>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {param.value}
+                    </span>
+                  </div>
+                  <Slider.Root
+                    className="relative flex items-center select-none w-full mt-5"
+                    defaultValue={[
+                      param.normalize ? param.value * 100 : param.value,
+                    ]}
+                    max={param.max}
+                    min={param.min}
+                    step={1}
+                    onValueChange={(value) => {
+                      if (param.normalize) {
+                        setParams({ ...params, [param.name]: value[0] / 100 });
+                      } else {
+                        setParams({ ...params, [param.name]: value[0] });
+                      }
+                    }}
+                  >
+                    <Slider.Track className="bg-black relative grow rounded-full h-[3px]">
+                      <Slider.Range className="absolute bg-violet-400 rounded-full h-full" />
+                    </Slider.Track>
+                    <Slider.Thumb
+                      className="block w-5 h-5 bg-white shadow-[0_2px_10px] shadow-blackA4 rounded-[10px] hover:bg-violet-500 focus:outline-none focus:shadow-[0_0_0_5px"
+                      aria-label="Slider thumb"
+                    />
+                  </Slider.Root>
+                </div>
+              ))}
+            </div>
+          </div>
+          <Form.Submit
+            disabled={isUploading}
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600 w-full mt-5"
+          >
+            {isUploading ? "Uploading..." : "Upload"}
           </Form.Submit>
         </Form.Root>
 
