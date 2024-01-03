@@ -9,3 +9,15 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model SwapPair {
+  id             Int      @id @default(autoincrement())
+  source_img     String
+  target_img     String
+  output_img_url String
+  request_id     String
+  det_thresh     Float    @default(0.1)
+  weight         Float    @default(0.5)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
