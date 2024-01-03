@@ -9,11 +9,29 @@ type swapParams = {
   weight: number;
 };
 
+function onUploadSuccess() {
+  window.location.reload();
+}
+
 export default function UploadImages() {
-  const [src_image, setSrcImage] = useState<File | null>(null);
-  const [target_img, setTargetImg] = useState<File | null>(null);
+  const [src_image, setSrcImage] = useState<Blob | null>(null);
+  const [target_img, setTargetImg] = useState<Blob | null>(null);
   const [result_img, setResultImg] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  // cached result_img
+  useEffect(() => {
+    if (!result_img) return;
+    localStorage.setItem("result_img", result_img as any);
+  }, [result_img]);
+
+  useEffect(() => {
+    // load state from localstorage at mount
+    const result_img = localStorage.getItem("result_img");
+    if (result_img) {
+      setResultImg(result_img);
+    }
+  }, []);
 
   const [params, setParams] = useState<swapParams>({
     det_thresh: 0.6,
@@ -72,14 +90,13 @@ export default function UploadImages() {
 
       console.log(response);
       response.json().then((data) => {
-        console.log(data);
         setResultImg(data.output.image);
       });
 
       // Handle success or redirect as needed
       console.log("Upload successful!");
       setIsUploading(false);
-      //   onUploadSuccess();
+      onUploadSuccess();
     } catch (error) {
       setIsUploading(false);
       console.error("Error uploading files:", error);
@@ -210,7 +227,7 @@ export default function UploadImages() {
                 id="src_image_preview"
                 className="object-cover w-full h-full rounded"
                 alt="Src Preview"
-                src={create_url_source(src_image)}
+                src={create_url_source(src_image as File)}
               />
             </div>
             <div className="relative aspect-w-1 aspect-h-1 overflow-hidden rounded-lg">
@@ -221,7 +238,7 @@ export default function UploadImages() {
                 id="target_image_preview"
                 className="object-cover w-full h-full rounded"
                 alt="Target Preview"
-                src={create_url_source(target_img)}
+                src={create_url_source(target_img as File)}
               />
             </div>
           </div>

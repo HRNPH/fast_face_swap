@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { TextField } from "@radix-ui/themes";
+import { read } from "fs";
 
 interface BaseResponse {
   message: string;
@@ -30,24 +31,71 @@ enum StatusMSG {
   "NULL" = "N/A",
 }
 
-function ImageOverlay(props: Swaps) {
+async function DeleteSwap(id: number) {
+  try {
+    if (!id) {
+      throw new Error("Invalid ID provided, from client");
+    }
+    const data = new FormData();
+    data.append("id", id.toString());
+    const request = await fetch(`${process.env.API_URL}/api/faceswap/swap`, {
+      method: "DELETE",
+      body: data,
+    });
+
+    if (!request.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return request;
+  } catch (error) {
+    console.error("Error deleting swap:", error);
+    throw new Error("Error deleting swap");
+  }
+}
+
+interface ImageWrapperProps {
+  swap: Swaps;
+  deletedSwapCallback?: (id: number) => void;
+}
+
+function ImageWrapper(props: ImageWrapperProps) {
+  const { swap } = props;
+
   const ShowedData = [
-    { display_name: "Output Image URLs", value: props.output_img_url },
-    { display_name: "Source Image URLs", value: props.source_img },
-    { display_name: "Target Image URLs", value: props.target_img },
-    { display_name: "Created At", value: props.created_at },
-    { display_name: "Updated At", value: props.updated_at },
-    { display_name: "Cached Days", value: props.cached_days },
-    { display_name: "Detection Threshold", value: props.det_thresh },
-    { display_name: "Weight", value: props.weight },
+    { display_name: "ID", value: swap.id, readonly: true },
+    {
+      display_name: "Output Image URLs",
+      value: swap.output_img_url,
+      readonly: true,
+    },
+    {
+      display_name: "Source Image URLs",
+      value: swap.source_img,
+      readonly: true,
+    },
+    {
+      display_name: "Target Image URLs",
+      value: swap.target_img,
+      readonly: true,
+    },
+    { display_name: "Created At", value: swap.created_at, readonly: true },
+    { display_name: "Updated At", value: swap.updated_at, readonly: true },
+    { display_name: "Cached Days", value: swap.cached_days, readonly: true },
+    {
+      display_name: "Detection Threshold",
+      value: swap.det_thresh,
+      readonly: false,
+    },
+    { display_name: "Weight", value: swap.weight, readonly: false },
   ];
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild style={{ pointerEvents: "auto" }}>
+        {/* id number on hover */}
         <img
-          src={props.output_img_url}
+          src={swap.output_img_url}
           className="h-auto w-full max-w-full rounded-lg object-cover object-center hover:cursor-pointer hover:opacity-85 transition ease-in-out hover:duration-300 hover:transform hover:scale-105"
-          alt={`Image ${props.id}`}
+          alt={`Image ${swap.id}`}
         />
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -64,9 +112,9 @@ function ImageOverlay(props: Swaps) {
             <div className="grid grid-cols-2">
               <div className="flex flex-col items-center justify-center mx-4">
                 <img
-                  src={props.output_img_url}
+                  src={swap.output_img_url}
                   className="h-96 rounded-xl object-cover object-center shadow-sm my-4"
-                  alt={`Image ${props.id}`}
+                  alt={`Image ${swap.id}`}
                 />
               </div>
               <div id="meta_block" className="flex flex-col w-96">
@@ -78,6 +126,7 @@ function ImageOverlay(props: Swaps) {
                         <TextField.Input
                           value={data.value ?? StatusMSG.NULL}
                           className="text-cutoff p-1 bg-foreground-light shadow-sm my-1 w-full rounded-sm border-none borders overflow-x-scroll"
+                          readOnly={data.readonly}
                         ></TextField.Input>
                       </TextField.Root>
                     </div>
@@ -88,9 +137,15 @@ function ImageOverlay(props: Swaps) {
                   <Button className="bg-primary text-cutoff py-2 px-4 rounded hover:bg-primary-dark focus:outline-none focus:bg-primary-dark hover:cursor-pointer">
                     Save
                   </Button>
-                  <Button className="bg-primary text-cutoff py-2 px-4 rounded hover:bg-primary-dark focus:outline-none focus:bg-primary-dark hover:cursor-pointer">
+                  <Dialog.Close
+                    className="bg-primary text-cutoff py-2 px-4 rounded hover:bg-primary-dark focus:outline-none focus:bg-primary-dark hover:cursor-pointer"
+                    onClick={() => {
+                      DeleteSwap(swap.id);
+                      props.deletedSwapCallback?.(swap.id);
+                    }}
+                  >
                     Delete
-                  </Button>
+                  </Dialog.Close>
                 </div>
               </div>
             </div>
@@ -103,11 +158,15 @@ function ImageOverlay(props: Swaps) {
 
 export default function GeneratedPool(props: { className?: string }) {
   const [galleryImages, setGalleryImages] = useState<Swaps[]>([]);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   // use Effect to continuously fetch images
   useEffect(() => {
+    if (refresh) {
+      setRefresh(false);
+    }
     getImages();
-  }, []);
+  }, [refresh]);
 
   // get images from api
   async function getImages() {
@@ -135,7 +194,14 @@ export default function GeneratedPool(props: { className?: string }) {
         <Masonry className="overflow-y-scroll h-96 w-screen border-b-2">
           {galleryImages.map((image, index) => (
             <div className="object-cover m-1" key={index}>
-              {ImageOverlay(image)}
+              {
+                <ImageWrapper
+                  swap={image}
+                  deletedSwapCallback={() => {
+                    setRefresh(true);
+                  }}
+                />
+              }
             </div>
           ))}
         </Masonry>

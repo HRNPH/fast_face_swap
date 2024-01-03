@@ -126,10 +126,11 @@ router.post('/swap', upload.fields([
         src_image: `${__filename.split('/').slice(0, -3).join('/')}/tmp/${req_id}_src_image.${files['src_image'][0].mimetype.split('/')[1]}`,
         target_img: `${__filename.split('/').slice(0, -3).join('/')}/tmp/${req_id}_target_img.${files['target_img'][0].mimetype.split('/')[1]}`,
       }
+
+      // save to file, YOU SHOULD CHANGE THIS TO S3 but for now, just save to local since it's just a demo
       await fs.writeFileSync(fnames.src_image, files['src_image'][0].buffer);
       await fs.writeFileSync(fnames.target_img, files['target_img'][0].buffer);
 
-      // json parse the output
       const faceSwap = await prisma.swapPair.create({
         data: {
           request_id: req_id,
@@ -151,5 +152,31 @@ router.post('/swap', upload.fields([
     res.status(500).json({ message: err });
   }
 });
+
+interface SwapDeleteRequest {
+  id: string;
+}
+
+router.delete('/swap', multer().none(), async (req, res) => {
+  try {
+    console.log("Deleting swap with id ", req);
+    const { id } = req.body as Partial<SwapDeleteRequest>;
+    if (!id) {
+      res.status(400).json({ message: 'Missing id!' });
+    } else {
+      const swap = await prisma.swapPair.delete({
+        where: {
+          id: parseInt(id),
+        }
+      });
+      res.json({ message: 'Face swap deleted!', swap: "swap" });
+    }
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json({ message: err });
+  }
+}
+);
 
 export const FaceSwapRouter: Router = router;
