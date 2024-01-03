@@ -16,7 +16,11 @@ function IsAllowedFile(file: File) {
   return allowed_types.includes(file.type);
 }
 
-export default function UploadImages() {
+interface UploadImagesProps {
+  className?: string;
+  id?: string;
+}
+export default function UploadImages(props: UploadImagesProps) {
   const [src_image, setSrcImage] = useState<Blob | null>(null);
   const [target_img, setTargetImg] = useState<Blob | null>(null);
   const [result_img, setResultImg] = useState<string | null>(null);
@@ -115,7 +119,7 @@ export default function UploadImages() {
   };
 
   return (
-    <div className="w-full mx-auto my-8">
+    <div className={`w-full mx-auto my-8 ${props.className}`} id={props.id}>
       <div className="w-full bg-white border border-gray-300 rounded-md shadow-md p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <Form.Root onSubmit={handleUpload}>
           <div

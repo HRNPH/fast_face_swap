@@ -242,7 +242,7 @@ export default function GeneratedPool(props: { className?: string }) {
           shownGalleryImages.length == 0 ? "hidden" : ""
         }`}
       >
-        <Masonry className="overflow-y-scroll h-96 w-screen border-b-2">
+        <Masonry className="overflow-y-scroll h-96 w-screen border-b-2 scroll-smooth">
           {shownGalleryImages.map((image, index) => (
             <div className="object-cover m-1" key={index}>
               {
