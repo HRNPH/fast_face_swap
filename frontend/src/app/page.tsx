@@ -16,7 +16,7 @@ export default function Home() {
           Generated
           <span className="text-primary"> Faces Swap </span>
           Images
-          <p className="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">
+          <span className="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">
             Easy{" "}
             <span className="text-primary transition hover:cursor-pointer hover:text-primary hover:underline">
               <a href="#generation_section">Generation</a>
@@ -33,7 +33,7 @@ export default function Home() {
             <span className="transition hover:cursor-pointer hover:text-primary hover:underline">
               Clicks
             </span>
-          </p>
+          </span>
         </p>
       </div>
       <GeneratedPool className="w-5/6 shadow-md shadow-foreground" />
