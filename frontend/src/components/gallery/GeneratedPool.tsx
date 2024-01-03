@@ -24,6 +24,11 @@ interface ImageWrapperProps {
   updateSwapCallback?: (id: number) => void;
 }
 
+function SearchAlgorithm(src: string, target: string) {
+  // using PartialMatchingSubstring method
+  return target.includes(src); // for example src "abc" in targe "abcdefg" is true but target "acb" is false
+}
+
 function ImageWrapper(props: ImageWrapperProps) {
   const { swap } = props;
   const [name, setName] = useState<string | null>(swap.name);
@@ -170,6 +175,8 @@ function ImageWrapper(props: ImageWrapperProps) {
 
 export default function GeneratedPool(props: { className?: string }) {
   const [galleryImages, setGalleryImages] = useState<Swaps[]>([]);
+  const [shownGalleryImages, setShownGalleryImages] = useState<Swaps[]>([]);
+  const [filter, setFilter] = useState<string>("");
   const [refresh, setRefresh] = useState<boolean>(false);
 
   // use Effect to continuously fetch images
@@ -185,16 +192,42 @@ export default function GeneratedPool(props: { className?: string }) {
     try {
       const result = await GetSwaps().then((res) => {
         setGalleryImages(res.swaps);
+        if (filter.length == 0) {
+          setShownGalleryImages(res.swaps);
+        }
       });
     } catch (error) {
       console.error("Error fetching images:", error);
     }
   }
+
+  useEffect(() => {
+    if (filter.length == 0) {
+      setShownGalleryImages(galleryImages);
+    }
+  }, [filter]);
   return (
     <>
+      {/* images search by name */}
+      <div className="flex flex-row items-center justify-center shadow-lg my-1 mb-3 w-1/2">
+        <TextField.Root className="w-full shadow-lg">
+          <TextField.Input
+            className="text-primary bg-cutoff -light shadow-sm w-full rounded-md border-none borders p-3"
+            placeholder="Search by name"
+            onChange={(e) => {
+              const searchName = e.target.value;
+              const newGalleryImages = galleryImages.filter((image) => {
+                return SearchAlgorithm(searchName, image.name ?? "");
+              });
+              setShownGalleryImages(newGalleryImages);
+              // setGalleryImages(newGalleryImages);
+            }}
+          />
+        </TextField.Root>
+      </div>
       <div className="text-xl font-bold mb-4">
         Gallery Of
-        <span className="text-primary"> {galleryImages.length} </span>
+        <span className="text-primary"> {shownGalleryImages.length} </span>
         Generated Images
       </div>
       <ResponsiveMasonry
@@ -202,7 +235,7 @@ export default function GeneratedPool(props: { className?: string }) {
         className={`w-1/2 ${props.className}`}
       >
         <Masonry className="overflow-y-scroll h-96 w-screen border-b-2">
-          {galleryImages.map((image, index) => (
+          {shownGalleryImages.map((image, index) => (
             <div className="object-cover m-1" key={index}>
               {
                 <ImageWrapper
