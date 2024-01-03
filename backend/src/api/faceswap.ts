@@ -53,12 +53,14 @@ type SwapBodyParamsGet ={
   det_thresh: string;
   cache_days: string;
   weight: string;
+  name: string;
 }
 
-type SwapBodyParams ={
+type SwapBodyParams = {
   det_thresh: number;
   cache_days: number;
   weight: number;
+  name: string;
 }
 
 router.get('/swap', async (req, res) => {
@@ -96,6 +98,7 @@ router.post('/swap', upload.fields([
       det_thresh: Number(det_thresh),
       cache_days: Number(cache_days),
       weight: Number(weight),
+      name: req.body.name,
     }
     // read buffer from file to base64
     const req_id = randomUUID();
@@ -140,6 +143,7 @@ router.post('/swap', upload.fields([
           output_img_url: output.image ?? '',
           det_thresh: config.det_thresh ?? 0.5,
           weight: config.weight ?? 0.5,
+          name: config.name ?? '',
         }
       });
       res.json({ message: 'Face swap successful!', output: output });
@@ -155,6 +159,7 @@ router.post('/swap', upload.fields([
 
 interface SwapDeleteRequest {
   id: string;
+  name: string;
 }
 
 router.delete('/swap', multer().none(), async (req, res) => {
@@ -178,5 +183,28 @@ router.delete('/swap', multer().none(), async (req, res) => {
   }
 }
 );
+
+router.put('/swap', multer().none(), async (req, res) => {
+  try {
+    const { id, name } = req.body as Partial<SwapDeleteRequest> & Partial<SwapBodyParamsGet>;
+    if (!id) {
+      res.status(400).json({ message: 'Missing id!' });
+    } else {
+      const swap = await prisma.swapPair.update({
+        where: {
+          id: parseInt(id),
+        },
+        data: {
+          name: name,
+        }
+      });
+      res.json({ message: 'Face swap updated!', swap: swap });
+    }
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json({ message: err });
+  }
+});
 
 export const FaceSwapRouter: Router = router;

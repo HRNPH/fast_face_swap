@@ -12,6 +12,7 @@ datasource db {
 
 model SwapPair {
   id             Int      @id @default(autoincrement())
+  name           String?
   source_img     String
   target_img     String
   output_img_url String

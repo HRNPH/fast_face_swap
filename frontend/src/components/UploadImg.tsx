@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
 import * as Slider from "@radix-ui/react-slider";
 import { normalize } from "path";
+import { TextField } from "@radix-ui/themes";
 type swapParams = {
+  name: string;
   det_thresh: number;
   cache_days: number;
   weight: number;
@@ -37,6 +39,7 @@ export default function UploadImages() {
     det_thresh: 0.6,
     cache_days: 10,
     weight: 0.8,
+    name: "",
   });
 
   const paramsList = [
@@ -82,6 +85,7 @@ export default function UploadImages() {
       formData.append("target_img", target_img as Blob);
       formData.append("det_thresh", params.det_thresh.toString());
       formData.append("weight", params.weight.toString());
+      formData.append("name", params.name);
 
       const response = await fetch(`${process.env.API_URL}/api/faceswap/swap`, {
         method: "POST",
@@ -245,7 +249,28 @@ export default function UploadImages() {
 
           {/* parameters */}
           <div className="w-full mt-4">
-            {/* det_thresh */}
+            {/* name */}
+            <div className="w-full mt-4">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-400"
+                >
+                  Image Name
+                </label>
+              </div>
+              <div className="mt-1">
+                <TextField.Input
+                  placeholder="Image Name"
+                  name="name"
+                  value={params.name ?? ""}
+                  onChange={(e) => {
+                    setParams({ ...params, name: e.target.value });
+                  }}
+                  readOnly={false}
+                />
+              </div>
+            </div>
             <div className="flex flex-col items-center justify-center w-full">
               {/* map */}
               {paramsList.map((param) => (
@@ -299,7 +324,7 @@ export default function UploadImages() {
 
         <div className="mt-2">
           <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">Results</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Last Results</h2>
           </div>
           <div className="flex items-center justify-center">
             <div className="relative w-full aspect-w-1 aspect-h-1 overflow-hidden rounded-lg shadow-lg">

@@ -1,10 +1,13 @@
 import express from 'express';
 import { FaceSwapRouter } from './api/faceswap';
-import { ApiRoutes } from '../types/apiRoutes';
 import swaggerUi from "swagger-ui-express";
 import swaggerOutput from "./swagger_output.json";
 import morgan from 'morgan';
 import cors from 'cors';
+
+export enum ApiRoutes {
+    faceswap = '/api/faceswap',
+}
 
 const app: express.Application = express();
 const port: number = Number(process.env.PORT) || 3000;
