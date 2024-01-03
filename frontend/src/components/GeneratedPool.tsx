@@ -69,7 +69,7 @@ function ImageOverlay(props: Swaps) {
                   alt={`Image ${props.id}`}
                 />
               </div>
-              <div id="meta_block" className="flex flex-col">
+              <div id="meta_block" className="flex flex-col w-96">
                 <div className="text-xl font-bold text-foreground overflow-y-scroll max-h-96 px-6">
                   {ShowedData.map((data, index) => (
                     <div key={index} className="text-base">
