@@ -10,7 +10,7 @@ export enum ApiRoutes {
 }
 
 const app: express.Application = express();
-const port: number = Number(process.env.PORT) || 3000;
+const port: number = Number(process.env.PORT) || 3002;
 app.use(cors())
 app.use(ApiRoutes.faceswap, FaceSwapRouter);
 app.use(express.json());
