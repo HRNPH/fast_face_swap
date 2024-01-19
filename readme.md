@@ -8,7 +8,7 @@ SwapGals is a user-friendly AI application that simplifies the process of creati
 
 ## Folder Structure
 
-- `/backend`: Node.js Express backend.
+- `/backend`: Node.js Express backend. (Interviewer Asked me to do this don't question why I don't use API routes ok?)
 - `/frontend`: Next.js frontend.
 
 ## Getting Started
